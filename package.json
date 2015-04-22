@@ -1,0 +1,19 @@
+{
+  "name": "m3u-parser",
+  "version": "1.0.0",
+  "description": "Simple library for hassle-free M3U playlists parsing",
+  "main": "m3u.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Nikita Khomyakov <dr.evil@krtn.eu>",
+  "license": "GPLv3",
+  "dependencies": {
+    "bluebird": "^2.9.24"
+  },
+  "devDependencies": {
+    "chai": "^2.2.0",
+    "chai-as-promised": "^5.0.0",
+    "mocha": "^2.2.4"
+  }
+}

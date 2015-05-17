@@ -5,3 +5,15 @@ node_js:
   - "0.11"
   - "0.10"
   - "iojs"
+
+addons:
+  code_climate:
+    repo_token: c03c3ee4ec400e561c058906ae176373b61677e0a13b2d6892015ed399a44274
+
+before_script:
+  - npm install -g codeclimate-test-reporter
+
+script: npm run ci-test
+
+after_script:
+  - codeclimate < coverage/lcov.info

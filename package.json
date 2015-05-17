@@ -1,10 +1,11 @@
 {
   "name": "m3u-parser",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Simple library for hassle-free M3U playlists parsing",
   "main": "m3u.js",
   "scripts": {
-    "test": "mocha -R list"
+    "test": "mocha -R list",
+    "ci-test": "istanbul cover _mocha -- -R tap > result.tap && istanbul report clover"
   },
   "keywords": [
     "m3u",
@@ -20,8 +21,9 @@
     "bluebird": "^2.9.24"
   },
   "devDependencies": {
-    "chai": "^2.2.0",
+    "chai": "^2.3.0",
     "chai-as-promised": "^5.0.0",
-    "mocha": "^2.2.4"
+    "istanbul": "^0.3.14",
+    "mocha": "^2.2.5"
   }
 }

@@ -18,12 +18,12 @@
   "bugs": "https://github.com/v12/m3u-parser/issues",
   "license": "GPLv3",
   "dependencies": {
-    "bluebird": "^2.9.24"
+    "bluebird": "^3.0.5"
   },
   "devDependencies": {
-    "chai": "^2.3.0",
+    "chai": "^3.4.1",
     "chai-as-promised": "^5.0.0",
-    "istanbul": "^0.3.14",
+    "istanbul": "^0.4.1",
     "mocha": "^2.2.5"
   }
 }

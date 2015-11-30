@@ -10,14 +10,17 @@ chai.should();
 
 var m3u = require('../m3u');
 
-var files = [fs.readFileSync(__dirname + '/playlists/extended.m3u')];
+var files = ['extended', 'invalid_extended']
+                .map(function (filename) { return fs.readFileSync(__dirname + '/playlists/' + filename + '.m3u'); });
 
 describe('M3U playlist parser', function () {
     it('should be rejeceted when invalid data passed', function () {
         return Promise.all([
             m3u.parse().should.eventually.be.rejected,
             m3u.parse(123).should.eventually.be.rejected,
-            m3u.parse('invalid').should.eventually.be.rejected
+            m3u.parse('invalid').should.eventually.be.rejected,
+            m3u.parse(files[1]).should.eventually.be.rejected,
+            m3u.parse('#EXTM3U\n\ninvalid').should.eventually.be.rejected
         ]);
     });
 

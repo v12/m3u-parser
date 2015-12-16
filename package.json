@@ -18,7 +18,7 @@
   "bugs": "https://github.com/v12/m3u-parser/issues",
   "license": "GPLv3",
   "dependencies": {
-    "bluebird": "^3.0.5"
+    "bluebird": "^3.1.1"
   },
   "devDependencies": {
     "chai": "^3.4.1",

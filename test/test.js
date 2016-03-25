@@ -14,7 +14,7 @@ var files = ['extended', 'invalid_extended']
                 .map(function (filename) { return fs.readFileSync(__dirname + '/playlists/' + filename + '.m3u'); });
 
 describe('M3U playlist parser', function () {
-    it('should be rejeceted when invalid data passed', function () {
+    it('should be rejected when invalid data passed', function () {
         return Promise.all([
             m3u.parse().should.eventually.be.rejected,
             m3u.parse(123).should.eventually.be.rejected,

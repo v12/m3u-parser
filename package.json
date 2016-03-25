@@ -1,6 +1,6 @@
 {
   "name": "m3u-parser",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Simple library for hassle-free M3U playlists parsing",
   "main": "m3u.js",
   "scripts": {

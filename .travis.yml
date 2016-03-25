@@ -25,7 +25,7 @@ deploy:
   provider: npm
   email: dr.evil@krtn.eu
   api_key:
-    secure: UqkQhltzzEzHJ1le8PRlGazywsUsfvfoj44SQ8WT792OZ/HdncbE1WYtP/OaV0IXvk3US5wWEs2WDnfBkHDl8RSzcCbNe/KdY3aqkBBMOCcy9or8+x0XEG2Ji9tFdKwNiwH3BkSzrIxERyyMoeUA6QMHiwQd3wSwyAUFyK2EeRI=
+    secure: eFmn89ea3wqktaD+ZLif/K8DqQG2Xb5y5QMsdGUVL1L4T/OutiLVlV2qwvu79vefotECP1kvFbrK20hQ48WIi/5TWGPTxU5AyP/q1Oy43ql09vdoaSJOSpCXBPfwx0y+BawbaltIRkyem5Qd1RWVzM+Izg5H5+sxjwbOLkyElgI=
   on:
     tags: true
     repo: v12/m3u-parser

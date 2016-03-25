@@ -38,6 +38,11 @@ describe('M3U playlist parser', function () {
                         data[0].file.should.be.equal('Sample.mp3')
                     ]);
                 });
-        })
+        });
+
+        it('should parse negative duration properly', function () {
+            return m3u.parse(files[ 0 ]).should.be.eventually.fulfilled
+                .and.have.deep.property('[4].duration', -1);
+        });
     });
 });

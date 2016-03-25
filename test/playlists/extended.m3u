@@ -11,3 +11,6 @@ http://example.com/supertrack.mp3
 
 #EXTINF:0,Some Stream
 http://example.com/stream.mp4
+
+#EXTINF:-1,Negative Duration
+http://example.com/stream.webm

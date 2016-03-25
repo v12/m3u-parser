@@ -24,13 +24,13 @@ function parse (data) {
                 buffer[buffer.length - 1].file = line;
                 isWaitingForLink = false;
             } else if (line.slice(0, 7) === '#EXTINF') {
-                var result = /^#EXTINF:(\d+),(.*)$/.exec(line);
+                var result = /^#EXTINF:(-?)(\d+),(.*)$/.exec(line);
                 if (!result)
                     throw new Error('Invalid M3U format');
 
                 buffer.push({
-                    title:    result[2].trim(),
-                    duration: +(result[1].trim())
+                    title:    result[3].trim(),
+                    duration: +(result[1] + result[2].trim())
                 });
 
                 isWaitingForLink = true;

@@ -30,7 +30,7 @@ describe('M3U playlist parser', function () {
                 .then(function (data) {
                     return Promise.all([
                         data.should.be.an.instanceOf(Array),
-                        data.should.have.length(4),
+                        data.should.have.length(5),
                         data[0].should.be.an('object'),
                         data[0].should.have.all.keys('file', 'title', 'duration'),
                         data[0].duration.should.be.equal(123),

@@ -5,6 +5,7 @@
   "main": "m3u.js",
   "scripts": {
     "test": "mocha -R list",
+    "lint": "eslint m3u.js",
     "ci-test": "istanbul cover _mocha -- -R tap > result.tap && istanbul report clover"
   },
   "keywords": [
@@ -23,6 +24,7 @@
   "devDependencies": {
     "chai": "^3.4.1",
     "chai-as-promised": "^5.0.0",
+    "eslint": "^2.5.3",
     "istanbul": "^0.4.1",
     "mocha": "^2.2.5"
   }

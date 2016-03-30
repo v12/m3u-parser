@@ -1,0 +1,9 @@
+#EXTM3U
+
+#EXTINF:0,Some Stream
+#EXTGRP:News
+http://example.com/stream.mp4
+
+#EXTINF:-1,Negative Duration
+#EXTGRP:Comedy
+http://example.com/stream.webm

@@ -17,6 +17,7 @@ describe('M3U playlist parser', function () {
     it('should be rejected when invalid data passed', function () {
         return Promise.all([
             m3u.parse().should.eventually.be.rejected,
+            m3u.parse('').should.eventually.be.rejected,
             m3u.parse(123).should.eventually.be.rejected,
             m3u.parse('invalid').should.eventually.be.rejected,
             m3u.parse(files[1]).should.eventually.be.rejected,

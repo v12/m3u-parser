@@ -23,6 +23,8 @@
   "devDependencies": {
     "async": "2.0.0-rc.3",
     "babel-cli": "^6.6.5",
+    "babel-plugin-transform-es2015-arrow-functions": "^6.5.2",
+    "babel-plugin-transform-es2015-block-scoping": "^6.7.1",
     "babel-register": "^6.7.2",
     "chai": "3.5.0",
     "chai-as-promised": "^6.0.0",

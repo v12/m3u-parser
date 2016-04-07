@@ -1,5 +1,7 @@
 coverage
+.babelrc
 .eslintignore
 .eslintrc.json
 .gitignore
 .travis.yml
+src

@@ -20,10 +20,8 @@
   "homepage": "https://github.com/v12/m3u-parser",
   "bugs": "https://github.com/v12/m3u-parser/issues",
   "license": "ISC",
-  "dependencies": {
-    "bluebird": "^3.1.1"
-  },
   "devDependencies": {
+    "async": "2.0.0-rc.3",
     "babel-cli": "^6.6.5",
     "babel-register": "^6.7.2",
     "chai": "3.5.0",

@@ -14,3 +14,6 @@ http://example.com/stream.mp4
 
 #EXTINF:-1,Negative Duration
 http://example.com/stream.webm
+
+#EXTINF:-1 channel-id="1" tvg-id="test_id_1" tvg-name="Some Stream",Some Interesting Stream
+http://example.org/livestream.mp4

@@ -1,49 +1,110 @@
 'use strict';
 
-var fs = require('fs');
-var Promise = require('bluebird');
-var chai = require('chai');
-var chaiAsPromised = require('chai-as-promised');
+var fs    = require('fs');
+var path  = require('path');
+var async = require('async');
+var chai  = require('chai');
 
-chai.use(chaiAsPromised);
-chai.should();
+chai.use(require('chai-as-promised'));
 
-var m3u = require('../src/m3u');
+const expect = chai.expect;
 
-var files = ['extended', 'invalid_extended']
-                .map(function (filename) { return fs.readFileSync(__dirname + '/playlists/' + filename + '.m3u'); });
+const m3u = require('../src/m3u');
 
 describe('M3U playlist parser', function () {
+    before(function (done) {
+        const playlistDir = path.resolve(__dirname, 'playlists');
+
+        fs.readdir(playlistDir, (err, files) => {
+            if (err)
+                return done(err);
+
+            async.map(files,
+                (file, cb) => fs.readFile(path.resolve(playlistDir, file), cb),
+                (err, filesContent) => {
+                    if (err)
+                        return done(err);
+
+                    this.files = {};
+                    files.forEach((filename, i) =>
+                        this.files[filename.replace(/\.m3u(8)?$/, (s, e) => e ? '.ext' : '')] = filesContent[i]);
+
+                    done();
+                });
+        });
+    });
+
     it('should be rejected when invalid data passed', function () {
         return Promise.all([
-            m3u.parse().should.eventually.be.rejected,
-            m3u.parse('').should.eventually.be.rejected,
-            m3u.parse(123).should.eventually.be.rejected,
-            m3u.parse('invalid').should.eventually.be.rejected,
-            m3u.parse(files[1]).should.eventually.be.rejected,
-            m3u.parse('#EXTM3U\n\ninvalid').should.eventually.be.rejected
+            expect(m3u.parse()).to.eventually.be.rejected,
+            expect(m3u.parse(123)).to.eventually.be.rejected,
+            expect(m3u.parse(this.files['invalid.ext'])).to.eventually.be.rejected,
+            expect(m3u.parse(this.files['invalid-extinf.ext'])).to.eventually.be.rejected,
+            expect(m3u.parse(this.files['invalid-noextinf.ext'])).to.eventually.be.rejected,
+            expect(m3u.parse(this.files['invalid-duration.ext'])).to.eventually.be.rejected,
+            expect(m3u.parse(this.files['invalid-no-items.ext'])).to.eventually.be.rejected,
+            expect(m3u.parse('#EXTM3U\n\ninvalid')).to.eventually.be.rejected,
+            expect(m3u.parse('#EXTENDED_M3U')).to.eventually.be.rejected
         ]);
+    });
+
+    it('should return empty array when empty playlist is provided', function () {
+        return expect(m3u.parse('')).to.eventually.have.length(0);
+    });
+
+    describe('simple format', function () {
+        it('should be parsed properly', function () {
+            return m3u.parse(this.files['simple']).then(function (data) {
+                expect(data).to.have.length(7);
+                expect(data[4]).to.deep.equal({
+                    file:     '..\\Other Music\\Bar.mp3',
+                    duration: null,
+                    title:    null
+                });
+            });
+        });
     });
 
     describe('extended format', function () {
         it('should return array with playlist items', function () {
-            return m3u.parse(files[0])
-                .then(function (data) {
-                    return Promise.all([
-                        data.should.be.an.instanceOf(Array),
-                        data.should.have.length(5),
-                        data[0].should.be.an('object'),
-                        data[0].should.have.all.keys('file', 'title', 'duration'),
-                        data[0].duration.should.be.equal(123),
-                        data[0].title.should.be.equal('Sample artist - Sample title'),
-                        data[0].file.should.be.equal('Sample.mp3')
-                    ]);
+            return m3u.parse(this.files['simple.ext']).then(function (data) {
+                expect(data).to.be.an.instanceOf(Array);
+                expect(data[0]).to.be.deep.equal({
+                    duration: 123,
+                    title:    'Sample artist - Sample title',
+                    file:     'Sample.mp3'
                 });
+            });
+        });
+
+        it('should parse EXTINF attributes', function () {
+            return m3u.parse(this.files['simple.ext']).then(function (data) {
+                expect(data[5]).to.be.deep.equal({
+                    duration:   -1,
+                    title:      'Some Interesting Stream',
+                    file:       'http://example.org/livestream.mp4',
+                    attributes: {
+                        'tvg-id':     'test_id_1',
+                        'tvg-name':   'Some Stream',
+                        'channel-id': '1'
+                    }
+                });
+            });
         });
 
         it('should parse negative duration properly', function () {
-            return m3u.parse(files[ 0 ]).should.be.eventually.fulfilled
-                .and.have.deep.property('[4].duration', -1);
+            return expect(m3u.parse(this.files['simple.ext'])).to.eventually.have.deep.property('[4].duration', -1);
+        });
+
+        it('should handle unknown tags', function () {
+            return expect(m3u.parse(this.files['unknown-tag.ext'])).to.eventually.deep.equal([
+                {
+                    duration: 123,
+                    title:    'Sample artist - Sample title',
+                    file:     'Sample.mp3',
+                    '#EXTGRP': 'Test group'
+                }
+            ]);
         });
     });
 });

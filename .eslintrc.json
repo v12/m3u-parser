@@ -1,14 +1,11 @@
 {
   "env": {
     "es6": true,
-    "node": true
+    "node": true,
+    "amd": true
   },
   "extends": "eslint:recommended",
   "rules": {
-    "indent": [
-      "error",
-      4
-    ],
     "linebreak-style": [
       "error",
       "unix"

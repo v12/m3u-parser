@@ -4,9 +4,11 @@
   "description": "Simple library for hassle-free M3U playlists parsing",
   "main": "m3u.js",
   "scripts": {
+    "prepublish": "npm run lint && npm run build",
+    "build": "babel src/m3u.js --out-file m3u.js",
     "test": "mocha -R list",
     "lint": "eslint m3u.js",
-    "ci-test": "istanbul cover _mocha -- -R tap > result.tap && istanbul report clover"
+    "ci-test": "istanbul cover _mocha -- -R tap --compilers js:babel-register > result.tap && istanbul report clover"
   },
   "keywords": [
     "m3u",
@@ -22,6 +24,8 @@
     "bluebird": "^3.1.1"
   },
   "devDependencies": {
+    "babel-cli": "^6.6.5",
+    "babel-register": "^6.7.2",
     "chai": "3.5.0",
     "chai-as-promised": "5.3.0",
     "eslint": "2.7.0",

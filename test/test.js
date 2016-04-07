@@ -8,7 +8,7 @@ var chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 chai.should();
 
-var m3u = require('../m3u');
+var m3u = require('../src/m3u');
 
 var files = ['extended', 'invalid_extended']
                 .map(function (filename) { return fs.readFileSync(__dirname + '/playlists/' + filename + '.m3u'); });

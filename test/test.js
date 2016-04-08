@@ -52,6 +52,16 @@ describe('M3U playlist parser', function () {
         return expect(m3u.parse('')).to.eventually.have.length(0);
     });
 
+    it('should call callback function when done', function (done) {
+        m3u.parse(this.files['simple.ext'], done);
+    });
+
+    it('should call callback function when error happens', function (done) {
+        m3u.parse(this.files['invalid.ext'], err => {
+            done(err instanceof Error ? null : err);
+        });
+    });
+
     describe('simple format', function () {
         it('should be parsed properly', function () {
             return m3u.parse(this.files['simple']).then(function (data) {

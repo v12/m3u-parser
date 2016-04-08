@@ -25,9 +25,10 @@
         if (data.length === 0)
             return resolve([]);
 
+        data[0] = data[0].trim();
 
         if (data[0][0] === '#') {
-            const line = data.shift().trim();
+            const line = data.shift();
             if (line !== '#EXTM3U')
                 return reject(new Error('Unsupported playlist format'));
         } else

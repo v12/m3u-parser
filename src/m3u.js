@@ -9,7 +9,12 @@
 }(this, function () {
     'use strict';
 
-    function parse (data, cb) {
+    function parse (data, options, cb) {
+        if (arguments.length === 2) { // todo optimize
+            cb      = options;
+            options = {};
+        }
+
         const promise = typeof cb !== 'function',
               resolve = promise ? Promise.resolve.bind(Promise) : (r => cb(null, r)),
               reject  = promise ? Promise.reject.bind(Promise) : cb;
@@ -33,7 +38,7 @@
 
             if (line === '#EXTM3U')
                 isExtended = true;
-            else if (line.slice(1, 4) === 'EXT')
+            else if (options.strict && line.slice(1, 4) === 'EXT')
                 return reject(new Error('Extended format playlist should start with #EXTM3U tag'));
         }
 

@@ -8,7 +8,7 @@
     "build": "babel src/m3u.js --out-file m3u.js",
     "test": "mocha -R list",
     "lint": "eslint m3u.js",
-    "ci-test": "istanbul cover _mocha -- -R tap --compilers js:babel-register > result.tap && istanbul report clover"
+    "ci-test": "istanbul cover _mocha -- -R tap --compilers js:babel-register,js:babel-polyfill > result.tap && istanbul report clover"
   },
   "keywords": [
     "m3u",
@@ -26,6 +26,7 @@
     "babel-plugin-transform-es2015-arrow-functions": "^6.5.2",
     "babel-plugin-transform-es2015-block-scoping": "^6.7.1",
     "babel-plugin-transform-es2015-shorthand-properties": "^6.5.0",
+    "babel-polyfill": "^6.7.4",
     "babel-register": "^6.7.2",
     "chai": "3.5.0",
     "chai-as-promised": "^6.0.0",

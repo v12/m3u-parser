@@ -10,9 +10,15 @@
     'use strict';
 
     function parse (data, options, cb) {
-        if (arguments.length === 2) { // todo optimize
-            cb      = options;
+        if (arguments.length === 0)
+            throw new Error('Parser should be called at least with the playlist parameter specified');
+        else if (arguments.length === 1) // todo optimize
             options = {};
+        else if (arguments.length === 2) {
+            if (typeof options === 'function') { // todo optimize
+                cb      = options;
+                options = {};
+            }
         }
 
         const promise = typeof cb !== 'function',

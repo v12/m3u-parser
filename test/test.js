@@ -9,7 +9,7 @@ chai.use(require('chai-as-promised'));
 
 const expect = chai.expect;
 
-const m3u = require('../src/m3u');
+const parse = require('../src/m3u').parse;
 
 describe('M3U playlist parser', function () {
     before(function (done) {
@@ -35,36 +35,38 @@ describe('M3U playlist parser', function () {
     });
 
     it('should be rejected when invalid data passed', function () {
-        return Promise.all([
-            expect(m3u.parse()).to.eventually.be.rejected,
-            expect(m3u.parse(123)).to.eventually.be.rejected,
-            expect(m3u.parse(this.files['invalid.ext'])).to.eventually.be.rejected,
-            expect(m3u.parse(this.files['invalid-extinf.ext'])).to.eventually.be.rejected,
-            expect(m3u.parse(this.files['invalid-noextinf.ext'])).to.eventually.be.rejected,
-            expect(m3u.parse(this.files['invalid-duration.ext'])).to.eventually.be.rejected,
-            expect(m3u.parse(this.files['invalid-no-items.ext'])).to.eventually.be.rejected,
-            expect(m3u.parse('#EXTM3U\n\ninvalid')).to.eventually.be.rejected,
-            expect(m3u.parse('#EXTENDED_M3U')).to.eventually.be.rejected
-        ]);
+        const invalidPlaylists = [
+            undefined,
+            123,
+            this.files['invalid.ext'],
+            this.files['invalid-extinf.ext'],
+            this.files['invalid-noextinf.ext'],
+            this.files['invalid-duration.ext'],
+            this.files['invalid-no-items.ext'],
+            '#EXTM3U\n\ninvalid',
+            '#EXTENDED_M3U'
+        ];
+
+        return Promise.all(invalidPlaylists.map(data => expect(parse(data)).to.be.eventually.rejected));
     });
 
     it('should return empty array when empty playlist is provided', function () {
-        return expect(m3u.parse('')).to.eventually.have.length(0);
+        return expect(parse('')).to.eventually.have.length(0);
     });
 
     it('should call callback function when done', function (done) {
-        m3u.parse(this.files['simple.ext'], done);
+        parse(this.files['simple.ext'], done);
     });
 
     it('should call callback function when error happens', function (done) {
-        m3u.parse(this.files['invalid.ext'], err => {
+        parse(this.files['invalid.ext'], err => {
             done(err instanceof Error ? null : err);
         });
     });
 
     describe('simple format', function () {
         it('should be parsed properly', function () {
-            return m3u.parse(this.files['simple']).then(function (data) {
+            return parse(this.files['simple']).then(function (data) {
                 expect(data).to.have.length(7);
                 expect(data[4]).to.deep.equal({
                     file:     '..\\Other Music\\Bar.mp3',
@@ -73,11 +75,24 @@ describe('M3U playlist parser', function () {
                 });
             });
         });
+
+        describe('with comments', function () {
+            it('should be parsed properly', function () {
+                return parse(this.files['simple-with-comment']).then(function (data) {
+                    expect(data).to.have.length(7);
+                    expect(data[4]).to.deep.equal({
+                        file:     '..\\Other Music\\Bar.mp3',
+                        duration: null,
+                        title:    null
+                    });
+                });
+            });
+        });
     });
 
     describe('extended format', function () {
         it('should return array with playlist items', function () {
-            return m3u.parse(this.files['simple.ext']).then(function (data) {
+            return parse(this.files['simple.ext']).then(function (data) {
                 expect(data).to.be.an.instanceOf(Array);
                 expect(data[0]).to.be.deep.equal({
                     duration: 123,
@@ -88,7 +103,7 @@ describe('M3U playlist parser', function () {
         });
 
         it('should parse EXTINF attributes', function () {
-            return m3u.parse(this.files['simple.ext']).then(function (data) {
+            return parse(this.files['simple.ext']).then(function (data) {
                 expect(data[5]).to.be.deep.equal({
                     duration:   -1,
                     title:      'Some Interesting Stream',
@@ -103,18 +118,56 @@ describe('M3U playlist parser', function () {
         });
 
         it('should parse negative duration properly', function () {
-            return expect(m3u.parse(this.files['simple.ext'])).to.eventually.have.deep.property('[4].duration', -1);
+            return expect(parse(this.files['simple.ext'])).to.eventually.have.deep.property('[4].duration', -1);
         });
 
         it('should handle unknown tags', function () {
-            return expect(m3u.parse(this.files['unknown-tag.ext'])).to.eventually.deep.equal([
-                {
-                    duration: 123,
-                    title:    'Sample artist - Sample title',
-                    file:     'Sample.mp3',
-                    '#EXTGRP': 'Test group'
-                }
+            return expect(parse(this.files['unknown-tag.ext'])).to.eventually.deep.equal([{
+                duration:  123,
+                title:     'Sample artist - Sample title',
+                file:      'Sample.mp3',
+                '#EXTGRP': 'Test group'
+            }
             ]);
+        });
+
+        describe('tag #EXT-X-BYTERANGE', function () {
+            it('should be parsed for each playlist item', function () {
+                return expect(parse(this.files['x-byterange.ext'])).to.be.eventually.deep.equal([{
+                    duration:  0,
+                    title:     'Some Stream',
+                    file:      'http://example.com/stream.mp4',
+                    byteRange: { length: 100, offset: 222 }
+                }, {
+                    duration:  1233,
+                    title:     'Another stream',
+                    file:      'http://example.com/stream.webm',
+                    byteRange: { length: 33 }
+                }]);
+            });
+
+            it('should have valid format', function () {
+                return expect(parse('#EXTM3U\n#EXTINF:0,Some' +
+                    ' Stream\n#EXT-X-BYTERANGE:wow@222\nhttp://example.com/stream.mp4')).to.be.eventually
+                    .rejectedWith(Error, 'Invalid format of #EXT-X-BYTERANGE');
+            });
+        });
+
+        describe('tag #EXT-X-VERSION', function () {
+            it('should be parsed and exposed as an own property of the playlist array', function () {
+                return expect(parse(this.files['live.ext'])).to.eventually.have.ownProperty('version')
+                    .and.property('version').equals(3);
+            });
+
+            it('should appear only once in a playlist EXT-X-VERSION', function () {
+                return expect(parse('#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-VERSION:4')).to.be.eventually
+                    .rejectedWith(Error, 'EXT-X-VERSION tag must appear only once in the playlist');
+            });
+
+            it('should have valid integer value', function () {
+                return expect(parse('#EXTM3U\n#EXT-X-VERSION:shit')).to.be.eventually
+                    .rejectedWith(Error, 'Invalid format of #EXT-X-VERSION');
+            });
         });
     });
 });

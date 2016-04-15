@@ -34,6 +34,10 @@ describe('M3U playlist parser', function () {
         });
     });
 
+    it('should throw when no arguments were specified', function () {
+        expect(parse).to.throw(Error);
+    });
+
     it('should be rejected when invalid data passed', function () {
         const invalidPlaylists = [
             undefined,
@@ -47,7 +51,7 @@ describe('M3U playlist parser', function () {
             '#EXTENDED_M3U'
         ];
 
-        return Promise.all(invalidPlaylists.map(data => expect(parse(data)).to.be.eventually.rejected));
+        return Promise.all(invalidPlaylists.map(data => expect(parse(data, { strict: true })).to.be.eventually.rejected));
     });
 
     it('should return empty array when empty playlist is provided', function () {

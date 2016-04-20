@@ -9,6 +9,33 @@
 }(this, function () {
     'use strict';
 
+    function parseByteRange (value) {
+        const match = /^(\d+)(@(\d+))?/.exec(value); // todo simple string token (@) split?
+
+        if (!match)
+            return null;
+
+        const byteRange = { length: +match[1] };
+
+        if (match[3])
+            byteRange.offset = +match[3];
+
+        return byteRange;
+    }
+
+    function parseAttributesList (value) {
+        const result = {};
+
+        const ATTR_LIST_REGEX = /([A-Z0-9-]+)=(?:"([^"]+)"|([^,"\s]+))/g;
+
+        let match;
+        while ((match = ATTR_LIST_REGEX.exec(value)) !== null) {
+            result[match[1].toLowerCase()] = match[2] || match[3];
+        }
+
+        return result;
+    }
+
     function parse (data, options, cb) {
         if (arguments.length === 0)
             throw new Error('Parser should be called at least with the playlist parameter specified');
@@ -52,7 +79,8 @@
             return resolve(data.filter(line => line[0] !== '#').map(file => ({ file, title: null, duration: null })));
 
         const buffer = [];
-        let line;
+
+        let line, continuousAttributes = {};
 
         while ((line = data.shift())) {
             line = line.trim();
@@ -136,17 +164,16 @@
                         Use of the EXT-X-BYTERANGE tag REQUIRES a compatibility version number of 4 or greater.
                      */
                     case '-X-BYTERANGE':
-                        let match = /^(\d+)(@(\d+))?/.exec(value); // todo simple string token (@) split?
+                    {
+                        const byteRange = parseByteRange(value);
 
-                        if (!match)
+                        if (!byteRange)
                             return reject(new Error('Invalid format of #EXT-X-BYTERANGE - unable to parse'));
 
-                        item.byteRange = { length: +match[1] };
-
-                        if (match[3])
-                            item.byteRange.offset = +match[3];
+                        item.byteRange = byteRange;
 
                         break;
+                    }
 
                     /*
                      #EXT-X-DISCONTINUITY
@@ -155,6 +182,8 @@
                          preceded it.
                      */
                     case '-X-DISCONTINUITY':
+                        continuousAttributes = {};
+                        break;
 
                     /*
                      #EXT-X-KEY:<attribute-list>
@@ -176,6 +205,10 @@
                                 the "/" character
                      */
                     case '-X-KEY':
+                    {
+                        continuousAttributes.key = parseAttributesList(value);
+                        break;
+                    }
 
                     /*
                      #EXT-X-MAP:<attribute-list>
@@ -187,6 +220,20 @@
                             - BYTERANGE is a quoted-string
                      */
                     case '-X-MAP':
+                    {
+                        continuousAttributes.map = parseAttributesList(value);
+
+                        if (continuousAttributes.map.hasOwnProperty('byterange')) {
+                            let byteRange = parseByteRange(continuousAttributes.map['byterange']);
+
+                            if (!byteRange)
+                                return reject(new Error('Invalid byte range in #EXT-X-MAP BYTERANGE attribute'));
+
+                            continuousAttributes.map['byterange'] = byteRange;
+                        }
+
+                        break;
+                    }
 
                     /*
                      #EXT-X-PROGRAM-DATE-TIME:<YYYY-MM-DDThh:mm:ssZ>
@@ -196,6 +243,9 @@
                         The date/time representation is ISO/IEC 8601:2004
                      */
                     case '-X-PROGRAM-DATE-TIME':
+                        item.programDateTime = Date.parse(value);
+
+                        break;
 
                     /*
                      #EXT-X-DATERANGE:<attribute-list>
@@ -213,7 +263,7 @@
 
                      */
                     case '-X-DATERANGE':
-                        console.info('[m3u-parser] #EXT' + tagName + ' processing is not yet implemented');
+                        item.dateRange = parseAttributesList(value);
 
                         break;
 
@@ -223,7 +273,9 @@
                         break;
                 }
             } else if (item.file === null && item.title !== null) {
+                Object.assign(item, continuousAttributes);
                 item.file = line;
+
                 buffer.push({ file: null, title: null, duration: null });
             } else
                 return reject(new Error('Invalid data'));

@@ -64,7 +64,7 @@ describe('M3U playlist parser', function () {
 
     it('should call callback function when error happens', function (done) {
         parse(this.files['invalid.ext'], err => {
-            done(err instanceof Error ? null : err);
+            done(err instanceof Error ? null : new Error('Callback didn\'t fire with error'));
         });
     });
 

@@ -173,5 +173,54 @@ describe('M3U playlist parser', function () {
                     .rejectedWith(Error, 'Invalid format of #EXT-X-VERSION');
             });
         });
+
+        describe('tag #EXT-X-KEY', function () {
+            it('should be parsed and applied to every Media Segment that appears between it and the next EXT-X-KEY' +
+                ' tag in the Playlist file with the same KEYFORMAT attribute', function () {
+                return parse(this.files['encrypted-segments.ext']).then(data => {
+                    expect(data[0]).to.have.property('key');
+                    expect(data[3]).to.have.property('key');
+
+                    expect(data[0].key).to.deep.equal({
+                        method: 'AES-128',
+                        uri:    'https://priv.example.com/key.php?r=52'
+                    });
+                    expect(data[3].key).to.deep.equal({
+                        method: 'AES-128',
+                        uri:    'https://priv.example.com/key.php?r=53'
+                    });
+                });
+            });
+
+            it('should be parsed and applied to every Media Segment the end of the Playlist file');
+        });
+
+        describe('tag #EXT-X-MAP', function () {
+            it('should be parsed and applied to every Media Segment until the next EXT-X-MAP tag');
+
+            it('should be parsed and applied to every Media Segment until the end of the Playlist file', function () {
+                return parse(this.files['x-map.ext']).then(data => {
+                    data.forEach(item => {
+                        expect(item).to.have.property('map');
+                        expect(item.map).to.deep.equal({
+                            uri:       'main.mp4',
+                            byterange: { length: 560, offset: 0 }
+                        });
+                    });
+                });
+            });
+        });
+
+        describe('tag #EXT-X-DISCONTINUITY', function () {
+            it('should reset continuous attributes');
+        });
+
+        describe('tag #EXT-X-PROGRAM-DATE-TIME', function () {
+            it('should be parsed and applied to media segment');
+        });
+
+        describe('tag #EXT-X-DATERANGE', function () {
+            it('should be parsed and applied to media segment');
+        });
     });
 });

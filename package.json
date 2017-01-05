@@ -25,13 +25,14 @@
     "babel-cli": "^6.6.5",
     "babel-plugin-transform-es2015-arrow-functions": "^6.5.2",
     "babel-plugin-transform-es2015-block-scoping": "^6.7.1",
+    "babel-plugin-transform-es2015-modules-umd": "~6.18.0",
     "babel-plugin-transform-es2015-shorthand-properties": "^6.5.0",
     "babel-polyfill": "^6.7.4",
     "babel-register": "^6.7.2",
     "chai": "3.5.0",
-    "chai-as-promised": "5.3.0",
-    "eslint": "2.7.0",
+    "chai-as-promised": "^6.0.0",
+    "eslint": "^3.0.1",
     "istanbul": "^1.0.0-alpha.2",
-    "mocha": "2.4.5"
+    "mocha": "^3.0.1"
   }
 }

@@ -31,7 +31,10 @@
     "babel-register": "^6.7.2",
     "chai": "3.5.0",
     "chai-as-promised": "^6.0.0",
-    "eslint": "^3.0.1",
+    "eslint": "~3.12.2",
+    "eslint-config-standard": "~6.2.1",
+    "eslint-plugin-promise": "~3.4.0",
+    "eslint-plugin-standard": "~2.0.1",
     "istanbul": "^1.0.0-alpha.2",
     "mocha": "^3.0.1"
   }

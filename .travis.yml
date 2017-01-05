@@ -11,7 +11,7 @@ before_script:
 script: npm run ci-test
 
 after_script:
-  - CODECLIMATE_REPO_TOKEN=c03c3ee4ec400e561c058906ae176373b61677e0a13b2d6892015ed399a44274 codeclimate < coverage/lcov.info
+  - CODECLIMATE_REPO_TOKEN=c03c3ee4ec400e561c058906ae176373b61677e0a13b2d6892015ed399a44274 codeclimate-test-reporter < coverage/lcov.info
 
 deploy:
   provider: npm

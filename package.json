@@ -25,6 +25,7 @@
     "babel-cli": "^6.6.5",
     "babel-plugin-transform-es2015-arrow-functions": "^6.5.2",
     "babel-plugin-transform-es2015-block-scoping": "^6.7.1",
+    "babel-plugin-transform-es2015-modules-umd": "~6.18.0",
     "babel-plugin-transform-es2015-shorthand-properties": "^6.5.0",
     "babel-polyfill": "^6.7.4",
     "babel-register": "^6.7.2",

@@ -3,13 +3,7 @@ sudo: false
 language: node_js
 
 node_js:
-  - "node"
-  - "6"
-  - "5"
-  - "4"
-  - "0.12"
-  - "0.11"
-  - "iojs"
+  - node
 
 before_script:
   - npm install -g codeclimate-test-reporter

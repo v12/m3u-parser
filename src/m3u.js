@@ -1,94 +1,103 @@
-'use strict';
+'use strict'
 
 function parseByteRange (value) {
-  const match = /^(\d+)(@(\d+))?/.exec(value); // todo simple string token (@) split?
+  const match = /^(\d+)(@(\d+))?/.exec(value) // todo simple string token (@) split?
 
-  if (!match)
-    return null;
+  if (!match) {
+    return null
+  }
 
-  const byteRange = { length: +match[1] };
+  const byteRange = { length: +match[1] }
 
-  if (match[3])
-    byteRange.offset = +match[3];
+  if (match[3]) {
+    byteRange.offset = +match[3]
+  }
 
-  return byteRange;
+  return byteRange
 }
 
 function parseAttributesList (value) {
-  const result = {};
+  const result = {}
 
-  const ATTR_LIST_REGEX = /([A-Z0-9-]+)=(?:"([^"]+)"|([^,"\s]+))/g;
+  const ATTR_LIST_REGEX = /([A-Z0-9-]+)=(?:"([^"]+)"|([^,"\s]+))/g
 
-  let match;
+  let match
   while ((match = ATTR_LIST_REGEX.exec(value)) !== null) {
-    result[match[1].toLowerCase()] = match[2] || match[3];
+    result[match[1].toLowerCase()] = match[2] || match[3]
   }
 
-  return result;
+  return result
 }
 
 export function parse (data, options, cb) {
-  if (arguments.length === 0)
-    throw new Error('Parser should be called at least with the playlist parameter specified');
-  else if (arguments.length === 1) // todo optimize
-    options = {};
-  else if (arguments.length === 2) {
+  if (arguments.length === 0) {
+    throw new Error('Parser should be called at least with the playlist parameter specified')
+  } else if (arguments.length === 1) { // todo optimize
+    options = {}
+  } else if (arguments.length === 2) {
     if (typeof options === 'function') { // todo optimize
-      cb = options;
-      options = {};
+      cb = options
+      options = {}
     }
   }
 
-  const promise = typeof cb !== 'function',
-    resolve = promise ? Promise.resolve.bind(Promise) : (r => cb(null, r)),
-    reject = promise ? Promise.reject.bind(Promise) : cb;
+  const promise = typeof cb !== 'function'
+  const resolve = promise ? Promise.resolve.bind(Promise) : r => cb(null, r)
+  const reject = promise ? Promise.reject.bind(Promise) : cb
 
-  if (typeof Buffer === 'function' && Buffer.isBuffer(data))
-    data = data.toString();
-  else if (typeof data !== 'string')
-    return reject(new TypeError('Data passed to the parser should be a string'));
-
-  data = data.split('\n').filter(str => str.length > 0); // empty lines are ignored
-
-  if (data.length === 0)
-    return resolve([]);
-
-  data[0] = data[0].trim(); // trim first line
-
-  let isExtended = false;
-
-  if (data[0][0] === '#') {
-    const line = data.shift();
-
-    if (line === '#EXTM3U')
-      isExtended = true;
-    else if (options.strict && line.slice(1, 4) === 'EXT')
-      return reject(new Error('Extended format playlist should start with #EXTM3U tag'));
+  if (typeof Buffer === 'function' && Buffer.isBuffer(data)) {
+    data = data.toString()
+  } else if (typeof data !== 'string') {
+    return reject(new TypeError('Data passed to the parser should be a string'))
   }
 
-  if (!isExtended)
-    return resolve(data.filter(line => line[0] !== '#').map(file => ({ file, title: null, duration: null })));
+  data = data.split('\n').filter(str => str.length > 0) // empty lines are ignored
 
-  const buffer = [];
+  if (data.length === 0) {
+    return resolve([])
+  }
 
-  let line, continuousAttributes = {};
+  data[0] = data[0].trim() // trim first line
+
+  let isExtended = false
+
+  if (data[0][0] === '#') {
+    const line = data.shift()
+
+    if (line === '#EXTM3U') {
+      isExtended = true
+    } else if (options.strict && line.slice(1, 4) === 'EXT') {
+      return reject(new Error('Extended format playlist should start with #EXTM3U tag'))
+    }
+  }
+
+  if (!isExtended) {
+    return resolve(data.filter(line => line[0] !== '#').map(file => ({ file, title: null, duration: null })))
+  }
+
+  const buffer = []
+
+  let line
+  let continuousAttributes = {}
 
   while ((line = data.shift())) {
-    line = line.trim();
+    line = line.trim()
 
-    if (buffer.length === 0)
-      buffer.push({ file: null, title: null, duration: null });
+    if (buffer.length === 0) {
+      buffer.push({ file: null, title: null, duration: null })
+    }
 
-    const item = buffer[buffer.length - 1];
+    const item = buffer[buffer.length - 1]
 
     if (line[0] === '#' && line.slice(1, 4) === 'EXT') { // process only tags, ignore comments
-      const colonPos = line.indexOf(':', 4);
+      const colonPos = line.indexOf(':', 4)
 
-      if (colonPos === -1)
-        return reject(new Error('#EXT tag used but no data provided'));
+      if (colonPos === -1) {
+        return reject(new Error('#EXT tag used but no data provided'))
+      }
 
-      const tagName = line.slice(4, colonPos),
-        value = line.slice(colonPos + 1).trim();
+      const tagName = line.slice(4, colonPos)
+      const value = line.slice(colonPos + 1).trim()
 
       switch (tagName) {
         /*
@@ -99,15 +108,17 @@ export function parse (data, options, cb) {
             A Playlist file MUST NOT contain more than one EXT-X-VERSION tag.
          */
         case '-X-VERSION':
-          if (buffer.hasOwnProperty('version'))
-            return reject(new Error('EXT-X-VERSION tag must appear only once in the playlist'));
+          if (buffer.hasOwnProperty('version')) {
+            return reject(new Error('EXT-X-VERSION tag must appear only once in the playlist'))
+          }
 
-          if (!isFinite(value))
-            return reject(new Error('Invalid format of #EXT-X-VERSION - unable to parse'));
+          if (!isFinite(value)) {
+            return reject(new Error('Invalid format of #EXT-X-VERSION - unable to parse'))
+          }
 
-          buffer.version = +value;
+          buffer.version = +value
 
-          break;
+          break
 
         /*
          #EXTINF:<duration>,[<title>]
@@ -117,31 +128,30 @@ export function parse (data, options, cb) {
               UTF-8 text
          */
         case 'INF': {
-          const commaPos = value.lastIndexOf(',');
+          const commaPos = value.lastIndexOf(',')
 
-          if (commaPos === -1)
-            return reject(new Error('Invalid format of #EXTINF - unable to parse title'));
+          if (commaPos === -1) { return reject(new Error('Invalid format of #EXTINF - unable to parse title')) }
 
-          item.title = value.slice(commaPos + 1).trim();
+          item.title = value.slice(commaPos + 1).trim()
 
-          let match = /^(-?\d+)/.exec(value);
+          let match = /^(-?\d+)/.exec(value)
 
-          if (!match)
-            return reject(new Error('Invalid format of #EXTINF - unable to parse duration'));
+          if (!match) { return reject(new Error('Invalid format of #EXTINF - unable to parse duration')) }
 
-          item.duration = +match[1];
+          item.duration = +match[1]
 
-          const EXTINF_ATTR_REGEX = / ([A-z0-9_-]+)="(.+?)"/g,
-            details = value.slice(match[1].length, commaPos);
+          const EXTINF_ATTR_REGEX = / ([A-z0-9_-]+)="(.+?)"/g
+          const details = value.slice(match[1].length, commaPos)
 
           while ((match = EXTINF_ATTR_REGEX.exec(details)) !== null) {
-            if (!item.hasOwnProperty('attributes'))
-              item.attributes = {};
+            if (!item.hasOwnProperty('attributes')) {
+              item.attributes = {}
+            }
 
-            item.attributes[match[1]] = match[2];
+            item.attributes[match[1]] = match[2]
           }
 
-          break;
+          break
         }
 
         /*
@@ -154,14 +164,15 @@ export function parse (data, options, cb) {
             Use of the EXT-X-BYTERANGE tag REQUIRES a compatibility version number of 4 or greater.
          */
         case '-X-BYTERANGE': {
-          const byteRange = parseByteRange(value);
+          const byteRange = parseByteRange(value)
 
-          if (!byteRange)
-            return reject(new Error('Invalid format of #EXT-X-BYTERANGE - unable to parse'));
+          if (!byteRange) {
+            return reject(new Error('Invalid format of #EXT-X-BYTERANGE - unable to parse'))
+          }
 
-          item.byteRange = byteRange;
+          item.byteRange = byteRange
 
-          break;
+          break
         }
 
         /*
@@ -171,8 +182,8 @@ export function parse (data, options, cb) {
              preceded it.
          */
         case '-X-DISCONTINUITY':
-          continuousAttributes = {};
-          break;
+          continuousAttributes = {}
+          break
 
         /*
          #EXT-X-KEY:<attribute-list>
@@ -194,8 +205,8 @@ export function parse (data, options, cb) {
                     the "/" character
          */
         case '-X-KEY': {
-          continuousAttributes.key = parseAttributesList(value);
-          break;
+          continuousAttributes.key = parseAttributesList(value)
+          break
         }
 
         /*
@@ -208,18 +219,19 @@ export function parse (data, options, cb) {
                 - BYTERANGE is a quoted-string
          */
         case '-X-MAP': {
-          continuousAttributes.map = parseAttributesList(value);
+          continuousAttributes.map = parseAttributesList(value)
 
           if (continuousAttributes.map.hasOwnProperty('byterange')) {
-            let byteRange = parseByteRange(continuousAttributes.map['byterange']);
+            let byteRange = parseByteRange(continuousAttributes.map['byterange'])
 
-            if (!byteRange)
-              return reject(new Error('Invalid byte range in #EXT-X-MAP BYTERANGE attribute'));
+            if (!byteRange) {
+              return reject(new Error('Invalid byte range in #EXT-X-MAP BYTERANGE attribute'))
+            }
 
-            continuousAttributes.map['byterange'] = byteRange;
+            continuousAttributes.map['byterange'] = byteRange
           }
 
-          break;
+          break
         }
 
         /*
@@ -230,9 +242,9 @@ export function parse (data, options, cb) {
             The date/time representation is ISO/IEC 8601:2004
          */
         case '-X-PROGRAM-DATE-TIME':
-          item.programDateTime = Date.parse(value);
+          item.programDateTime = Date.parse(value)
 
-          break;
+          break
 
         /*
          #EXT-X-DATERANGE:<attribute-list>
@@ -250,37 +262,38 @@ export function parse (data, options, cb) {
 
          */
         case '-X-DATERANGE':
-          item.dateRange = parseAttributesList(value);
+          item.dateRange = parseAttributesList(value)
 
-          break;
+          break
 
         default:
-          item[line.slice(0, colonPos)] = value; // todo get value
+          item[line.slice(0, colonPos)] = value // todo get value
 
-          break;
+          break
       }
     } else if (item.file === null && item.title !== null) {
-      Object.assign(item, continuousAttributes);
-      item.file = line;
+      Object.assign(item, continuousAttributes)
+      item.file = line
 
-      buffer.push({ file: null, title: null, duration: null });
-    } else
-      return reject(new Error('Invalid data'));
+      buffer.push({ file: null, title: null, duration: null })
+    } else {
+      return reject(new Error('Invalid data'))
+    }
   }
 
+  let item = buffer[buffer.length - 1]
 
-  let item = buffer[buffer.length - 1];
+  if (item.title === null && item.duration === null && item.file === null) {
+    buffer.pop()
+  }
 
-  if (item.title === null && item.duration === null && item.file === null)
-    buffer.pop();
+  item = buffer[buffer.length - 1]
 
-  item = buffer[buffer.length - 1];
+  if (item.title === null || item.duration === null || item.file === null) {
+    return reject(new Error('Invalid playlist'))
+  }
 
-  if (item.title === null || item.duration === null || item.file === null)
-    return reject(new Error('Invalid playlist'));
-
-
-  return resolve(buffer);
+  return resolve(buffer)
 }
 
-export default parse;
+export default parse

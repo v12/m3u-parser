@@ -4,15 +4,12 @@ language: node_js
 
 node_js:
   - "node"
+  - "6"
+  - "5"
   - "4"
   - "0.12"
   - "0.11"
-  - "0.10"
   - "iojs"
-
-addons:
-  code_climate:
-    repo_token: c03c3ee4ec400e561c058906ae176373b61677e0a13b2d6892015ed399a44274
 
 before_script:
   - npm install -g codeclimate-test-reporter
@@ -20,7 +17,7 @@ before_script:
 script: npm run ci-test
 
 after_script:
-  - codeclimate < coverage/lcov.info
+  - CODECLIMATE_REPO_TOKEN=c03c3ee4ec400e561c058906ae176373b61677e0a13b2d6892015ed399a44274 codeclimate < coverage/lcov.info
 
 deploy:
   provider: npm

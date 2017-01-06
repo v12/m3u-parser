@@ -2,15 +2,26 @@
   "plugins": [
     "transform-es2015-arrow-functions",
     "transform-es2015-block-scoping",
-    "transform-es2015-shorthand-properties",
-    [
-      "transform-es2015-modules-umd",
-      {
-        "globals": {
-          "m3u": "m3uParser"
-        },
-        "exactGlobals": true
-      }
-    ]
-  ]
+    "transform-es2015-shorthand-properties"
+  ],
+  "env": {
+    "test": {
+      "plugins": [
+        "transform-es2015-modules-commonjs"
+      ]
+    },
+    "development": {
+      "plugins": [
+        [
+          "transform-es2015-modules-umd",
+          {
+            "globals": {
+              "m3u": "m3uParser"
+            },
+            "exactGlobals": true
+          }
+        ]
+      ]
+    }
+  }
 }

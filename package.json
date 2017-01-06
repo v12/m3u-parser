@@ -6,9 +6,9 @@
   "scripts": {
     "prepublish": "npm run lint && npm run build",
     "build": "babel src/m3u.js --out-file m3u.js",
-    "test": "mocha -R list",
+    "test": "NODE_ENV=test mocha -R list --compilers js:babel-register",
     "lint": "eslint m3u.js",
-    "ci-test": "istanbul cover _mocha -- -R tap --compilers js:babel-register,js:babel-polyfill > result.tap && istanbul report clover"
+    "ci-test": "NODE_ENV=test istanbul cover _mocha -- -R tap --compilers js:babel-register,js:babel-polyfill > result.tap && istanbul report clover"
   },
   "keywords": [
     "m3u",
@@ -25,6 +25,7 @@
     "babel-cli": "^6.6.5",
     "babel-plugin-transform-es2015-arrow-functions": "^6.5.2",
     "babel-plugin-transform-es2015-block-scoping": "^6.7.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",
     "babel-plugin-transform-es2015-modules-umd": "~6.18.0",
     "babel-plugin-transform-es2015-shorthand-properties": "^6.5.0",
     "babel-polyfill": "^6.7.4",

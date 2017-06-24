@@ -28,7 +28,7 @@
     "babel-register": "^6.7.2",
     "chai": "4.0.2",
     "chai-as-promised": "^6.0.0",
-    "eslint": "^3.0.1",
+    "eslint": "^4.1.0",
     "istanbul": "^1.0.0-alpha.2",
     "mocha": "^3.0.1"
   }

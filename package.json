@@ -21,7 +21,7 @@
   "bugs": "https://github.com/v12/m3u-parser/issues",
   "license": "ISC",
   "dependencies": {
-    "bluebird": "^3.1.1"
+    "bluebird": "3.5.3"
   },
   "devDependencies": {
     "babel-cli": "^6.6.5",
